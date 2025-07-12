@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { RepoOwner } from './repo-owner.entity';
 
 @Entity('repos')
 export class Repo {
@@ -33,6 +34,6 @@ export class Repo {
   })
   createdTimestamp: Date;
 
-  @Column({ name: 'user_id' })
-  userId: string;
+  @OneToMany(() => RepoOwner, (owner: RepoOwner) => owner.repo)
+  owners: RepoOwner[];
 }

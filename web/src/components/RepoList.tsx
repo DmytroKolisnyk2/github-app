@@ -28,10 +28,10 @@ interface RepoListProps {
   onAddClick: () => void;
 }
 
-function RepoList({ repos, isLoading, onAddClick }: RepoListProps) {
+const RepoList = ({ repos, isLoading, onAddClick }: RepoListProps) => {
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  
+
   const queryClient = useQueryClient();
 
   const updateMutation = useMutation({
@@ -41,12 +41,12 @@ function RepoList({ repos, isLoading, onAddClick }: RepoListProps) {
 
       queryClient.setQueryData(['repos'], (oldData: Repo[] | undefined) => {
         if (!oldData) return [data];
-        return oldData.map(repo => repo.id === data.id ? data : repo);
+        return oldData.map((repo) => (repo.id === data.id ? data : repo));
       });
     },
     onSettled: () => {
       setUpdatingId(null);
-    }
+    },
   });
 
   const deleteMutation = useMutation({
@@ -55,12 +55,12 @@ function RepoList({ repos, isLoading, onAddClick }: RepoListProps) {
       queryClient.invalidateQueries({ queryKey: ['repos'] });
       queryClient.setQueryData(['repos'], (oldData: Repo[] | undefined) => {
         if (!oldData) return [];
-        return oldData.filter(repo => repo.id !== id);
+        return oldData.filter((repo) => repo.id !== id);
       });
     },
     onSettled: () => {
       setDeletingId(null);
-    }
+    },
   });
 
   const handleUpdate = (id: number) => {
@@ -73,8 +73,8 @@ function RepoList({ repos, isLoading, onAddClick }: RepoListProps) {
     deleteMutation.mutate(id);
   };
 
-  const formatDate = (timestamp: string | number) => {
-    return new Date(Number(timestamp)).toLocaleDateString('en-US', {
+  const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -92,15 +92,10 @@ function RepoList({ repos, isLoading, onAddClick }: RepoListProps) {
   if (repos.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', p: 3 }}>
-        <Typography variant="body1" gutterBottom>
+        <Typography variant='body1' gutterBottom>
           No repositories found. Add your first GitHub repository!
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          startIcon={<AddIcon />}
-          onClick={onAddClick}
-        >
+        <Button variant='contained' color='primary' startIcon={<AddIcon />} onClick={onAddClick}>
           Add Repository
         </Button>
       </Box>
@@ -110,16 +105,11 @@ function RepoList({ repos, isLoading, onAddClick }: RepoListProps) {
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          startIcon={<AddIcon />}
-          onClick={onAddClick}
-        >
+        <Button variant='contained' color='primary' startIcon={<AddIcon />} onClick={onAddClick}>
           Add Repository
         </Button>
       </Box>
-      
+
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -136,7 +126,7 @@ function RepoList({ repos, isLoading, onAddClick }: RepoListProps) {
             {repos.map((repo) => (
               <TableRow key={repo.id}>
                 <TableCell>
-                  <Link href={repo.htmlUrl} target="_blank" rel="noopener noreferrer">
+                  <Link href={repo.htmlUrl} target='_blank' rel='noopener noreferrer'>
                     {repo.owner}/{repo.name}
                   </Link>
                 </TableCell>
@@ -145,21 +135,13 @@ function RepoList({ repos, isLoading, onAddClick }: RepoListProps) {
                 <TableCell>{repo.openIssues.toLocaleString()}</TableCell>
                 <TableCell>{formatDate(repo.createdAt)}</TableCell>
                 <TableCell>
-                  <Tooltip title="Update repository data">
-                    <IconButton 
-                      color="primary" 
-                      onClick={() => handleUpdate(repo.id)}
-                      disabled={updatingId === repo.id}
-                    >
+                  <Tooltip title='Update repository data'>
+                    <IconButton color='primary' onClick={() => handleUpdate(repo.id)} disabled={updatingId === repo.id}>
                       {updatingId === repo.id ? <CircularProgress size={24} /> : <RefreshIcon />}
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Delete repository">
-                    <IconButton 
-                      color="error" 
-                      onClick={() => handleDelete(repo.id)}
-                      disabled={deletingId === repo.id}
-                    >
+                  <Tooltip title='Delete repository'>
+                    <IconButton color='error' onClick={() => handleDelete(repo.id)} disabled={deletingId === repo.id}>
                       {deletingId === repo.id ? <CircularProgress size={24} /> : <DeleteIcon />}
                     </IconButton>
                   </Tooltip>
@@ -171,6 +153,6 @@ function RepoList({ repos, isLoading, onAddClick }: RepoListProps) {
       </TableContainer>
     </>
   );
-}
+};
 
-export default RepoList; 
+export default RepoList;

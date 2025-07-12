@@ -19,6 +19,7 @@ function RepoManager() {
   } = useQuery({
     queryKey: ['repos', user?.id],
     queryFn: fetchRepos,
+    refetchInterval: 10000,
   });
 
   const handleCloseError = () => {

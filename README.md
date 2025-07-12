@@ -120,3 +120,46 @@ The API provides the following endpoints:
 - `POST /api/repos`: Add a new repository
 - `PUT /api/repos/:id/update`: Update repository data from GitHub
 - `DELETE /api/repos/:id`: Remove a repository
+
+
+## Future Improvements
+
+### GitHub Webhooks Integration
+- Implement GitHub webhook subscriptions to automatically update repository data
+- Set up webhook endpoints in the API to receive GitHub events
+- Process webhook payloads to update repository metrics in real-time
+- Add webhook secret validation for security
+- Handle different event types (push, star, fork, etc.)
+
+### Add pagination for repos list
+
+### Enhanced Client-Side Routing
+- Implement React Router for better navigation and deep linking
+- Add dedicated routes for:
+  - Repository list view
+  - Individual repository details
+  - User settings
+  - Analytics dashboard
+- Implement route guards for protected pages
+- Add loading states between route transitions
+
+### Custom Authentication System
+- Replace Keycloak with a custom authentication solution:
+  - Implement JWT-based authentication
+  - Add email/password registration and login
+  - Support OAuth providers (GitHub, Google, etc.)
+  - Add password reset functionality
+  - Implement session management
+  - Add refresh token rotation
+  - Support 2FA (Two-Factor Authentication)
+
+### Other Planned Features
+- Add repository analytics and statistics
+- Implement user roles and permissions
+- Add team collaboration features
+- Support for repository tags and categorization
+- Add search and filtering capabilities
+- Implement rate limiting and caching
+- Add automated tests and CI/CD pipeline
+- Support for multiple GitHub accounts per user
+

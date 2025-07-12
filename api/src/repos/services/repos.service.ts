@@ -2,6 +2,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Repo } from '../entities/repo.entity';
+import { RepoOwner } from '../entities/repo-owner.entity';
 import { GithubService } from './github.service';
 import { CreateRepoDto } from '../dto/create-repo.dto';
 
@@ -10,12 +11,19 @@ export class ReposService {
   constructor(
     @InjectRepository(Repo)
     private readonly reposRepository: Repository<Repo>,
+    @InjectRepository(RepoOwner)
+    private readonly repoOwnersRepository: Repository<RepoOwner>,
     private readonly githubService: GithubService,
   ) {}
 
   async findAll(userId?: string): Promise<Repo[]> {
     if (userId) {
-      return this.reposRepository.find({ where: { userId } });
+      const repoOwners = await this.repoOwnersRepository.find({
+        where: { userId },
+        relations: ['repo'],
+      });
+      
+      return repoOwners.map(owner => owner.repo);
     }
     return this.reposRepository.find();
   }
@@ -31,45 +39,58 @@ export class ReposService {
     }
 
     let repo = await this.reposRepository.findOne({
-      where: { owner, name, userId },
+      where: { owner, name },
     });
 
     if (repo) {
-      throw new HttpException(
-        'Repository already added to your list',
-        HttpStatus.CONFLICT,
-      );
+      const existingOwnership = await this.repoOwnersRepository.findOne({
+        where: { repoId: repo.id, userId },
+      });
+
+      if (existingOwnership) {
+        throw new HttpException(
+          'Repository already added to your list',
+          HttpStatus.CONFLICT,
+        );
+      }
+    } else {
+      const githubData = await this.githubService.fetchRepoData(owner, name);
+
+      repo = new Repo();
+      repo.owner = owner;
+      repo.name = name;
+      repo.htmlUrl = githubData.html_url;
+      repo.stars = githubData.stargazers_count;
+      repo.forks = githubData.forks_count;
+      repo.openIssues = githubData.open_issues_count;
+      repo.createdAt = githubData.created_at;
+      
+      repo = await this.reposRepository.save(repo);
     }
 
-    const githubData = await this.githubService.fetchRepoData(owner, name);
+    const repoOwner = new RepoOwner();
+    repoOwner.repoId = repo.id;
+    repoOwner.userId = userId;
+    await this.repoOwnersRepository.save(repoOwner);
 
-    repo = new Repo();
-    repo.owner = owner;
-    repo.name = name;
-    repo.htmlUrl = githubData.html_url;
-    repo.stars = githubData.stargazers_count;
-    repo.forks = githubData.forks_count;
-    repo.openIssues = githubData.open_issues_count;
-    repo.createdAt = githubData.created_at;
-    repo.userId = userId;
-
-    return this.reposRepository.save(repo);
+    return repo;
   }
 
   async update(id: number, userId: string): Promise<Repo> {
-    const repo = await this.reposRepository.findOne({
-      where: { id, userId },
+    const ownership = await this.repoOwnersRepository.findOne({
+      where: { repoId: id, userId },
+      relations: ['repo'],
     });
 
-    if (!repo) {
+    if (!ownership) {
       throw new HttpException('Repository not found', HttpStatus.NOT_FOUND);
     }
 
-    return this.updateRepoData(id, repo.owner, repo.name);
+    return this.updateRepoData(id, ownership.repo.owner, ownership.repo.name);
   }
 
   async remove(id: number, userId: string): Promise<void> {
-    const result = await this.reposRepository.delete({ id, userId });
+    const result = await this.repoOwnersRepository.delete({ repoId: id, userId });
 
     if (result.affected === 0) {
       throw new HttpException('Repository not found', HttpStatus.NOT_FOUND);

@@ -68,7 +68,7 @@ services:
       dockerfile: Dockerfile
     container_name: github-app-api
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USERNAME: postgres
