@@ -30,14 +30,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       issuer: `${publicUrl}/realms/${realm}`,
       algorithms: ['RS256'],
     });
-
-    this.logger.debug(`JWT Strategy initialized with:
-      keycloakUrl: ${keycloakUrl}
-      realm: ${realm}
-      clientId: ${clientId}
-      jwksUri: ${keycloakUrl}/realms/${realm}/protocol/openid-connect/certs
-      audience check: disabled
-    `);
   }
 
   validate(payload: KeycloakPayload) {

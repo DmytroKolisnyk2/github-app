@@ -1,0 +1,24 @@
+{
+  "name": "github-app",
+  "version": "0.0.1",
+  "description": "GitHub repository management app",
+  "private": true,
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "start:api": "cd api && npm run start:dev",
+    "start:web": "cd web && npm run dev",
+    "start": "concurrently \"npm run start:api\" \"npm run start:web\"",
+    "install:all": "npm install && npm run install:api && npm run install:web",
+    "install:api": "cd api && npm install",
+    "install:web": "cd web && npm install",
+    "build": "npm run build:api && npm run build:web",
+    "build:api": "cd api && npm run build",
+    "build:web": "cd web && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 
